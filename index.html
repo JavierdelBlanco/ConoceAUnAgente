@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conocé a un agente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --paper:#F4F7FC;
+  --sheet:#FFFFFF;
+  --line:#CFDDF2;
+  --border:#BFD0EA;
+  --ink:#1B2A4E;
+  --ink-soft:#4A5A7E;
+  --agent:#2B59E6;
+  --on-agent:#FFFFFF;
+  --goal:#1F9D6B;
+  --red:#E0445A;
+  --panel:#EAF0FA;
+  --hl-bg:rgba(255,228,92,.6);
+  --hl-line:#D9A800;
+  --zone:rgba(224,68,90,.28);
+  --zone-line:#C8324B;
+  --c-percibe:#D9A800;
+  --c-percibe-bg:rgba(255,228,92,.32);
+  --c-decide:#2B59E6;
+  --c-decide-bg:rgba(43,89,230,.12);
+  --c-actua:#1F9D6B;
+  --c-actua-bg:rgba(31,157,107,.14);
+  --focus:#2B59E6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#0F1529;
+    --sheet:#161E38;
+    --line:#26325A;
+    --border:#33426F;
+    --ink:#E7ECFF;
+    --ink-soft:#A5B2D8;
+    --agent:#7CA2FF;
+    --on-agent:#0F1529;
+    --goal:#4FD1A0;
+    --red:#FF7A8E;
+    --panel:#1B2542;
+    --hl-bg:rgba(255,228,92,.28);
+    --hl-line:#FFE45C;
+  --zone:rgba(255,122,142,.30);
+  --zone-line:#FF8FA0;
+    --c-percibe:#FFE45C;
+    --c-percibe-bg:rgba(255,228,92,.16);
+    --c-decide:#7CA2FF;
+    --c-decide-bg:rgba(124,162,255,.16);
+    --c-actua:#4FD1A0;
+    --c-actua-bg:rgba(79,209,160,.16);
+    --focus:#FFE45C;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#0F1529;
+  --sheet:#161E38;
+  --line:#26325A;
+  --border:#33426F;
+  --ink:#E7ECFF;
+  --ink-soft:#A5B2D8;
+  --agent:#7CA2FF;
+  --on-agent:#0F1529;
+  --goal:#4FD1A0;
+  --red:#FF7A8E;
+  --panel:#1B2542;
+  --hl-bg:rgba(255,228,92,.28);
+  --hl-line:#FFE45C;
+  --zone:rgba(255,122,142,.30);
+  --zone-line:#FF8FA0;
+  --c-percibe:#FFE45C;
+  --c-percibe-bg:rgba(255,228,92,.16);
+  --c-decide:#7CA2FF;
+  --c-decide-bg:rgba(124,162,255,.16);
+  --c-actua:#4FD1A0;
+  --c-actua-bg:rgba(79,209,160,.16);
+  --focus:#FFE45C;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:1rem;
+  line-height:1.5;
+}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 16px 56px}
+h1{
+  font-size:clamp(2.2rem,7vw,3.9rem);
+  font-weight:800;
+  letter-spacing:-.025em;
+  line-height:1.02;
+  margin:0 0 12px;
+}
+.lead{max-width:62ch;margin:0 0 8px;color:var(--ink-soft);font-size:1.08rem}
+h2{font-size:1.3rem;font-weight:800;letter-spacing:-.01em;margin:0 0 8px;line-height:1.2}
+button{font:inherit;color:inherit;touch-action:manipulation}
+button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.stage{
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+  column-gap:28px;
+  row-gap:12px;
+  margin-top:26px;
+  align-items:start;
+}
+.c-hint,.c-agent,.c-sheet,.c-actions,.c-world{grid-column:1}
+.c-panel{grid-column:2;grid-row:1 / span 5}
+@media (max-width:860px){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .c-hint{order:1}.c-agent{order:2}.c-sheet{order:3}.c-actions{order:4}
+  .c-panel{grid-column:1;grid-row:auto;order:5;margin-top:6px}
+  .c-world{order:6}
+}
+
+.hint{
+  margin:0;
+  min-height:2.4rem;
+  font-family:"Caveat","Bradley Hand",cursive;
+  font-weight:600;
+  font-size:1.65rem;
+  line-height:1.15;
+  color:var(--agent);
+}
+.row{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.lbl{color:var(--ink-soft);font-size:.92rem;font-weight:600}
+.cap{margin:6px 0 0;color:var(--ink-soft);font-size:.92rem;max-width:60ch}
+.seg{display:inline-flex;flex-wrap:wrap;border:1.5px solid var(--ink);border-radius:10px;overflow:hidden}
+.seg button{
+  border:0;background:transparent;padding:8px 13px;font-weight:600;cursor:pointer;
+}
+.seg button+button{border-left:1.5px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.seg button:disabled{opacity:.45;cursor:not-allowed}
+.seg button:focus-visible{outline-offset:-3px}
+
+.btn{
+  border:1.5px solid var(--ink);background:var(--sheet);color:var(--ink);
+  padding:10px 16px;border-radius:10px;font-weight:700;cursor:pointer;
+}
+.btn.primary{background:var(--agent);border-color:var(--agent);color:var(--on-agent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.sheet{
+  position:relative;
+  background:var(--sheet);
+  border:1.5px solid var(--border);
+  border-radius:6px;
+  padding:12px 12px 12px 26px;
+}
+.sheet::before{
+  content:"";position:absolute;left:14px;top:0;bottom:0;width:2px;background:var(--red);opacity:.75;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(10,minmax(0,1fr));
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+  user-select:none;
+}
+.cell{
+  position:relative;
+  aspect-ratio:1/1;
+  min-width:0;
+  padding:0;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;
+  border:0;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  border-radius:0;
+  cursor:pointer;
+}
+.cell:focus-visible{outline-offset:-3px;z-index:3}
+.cell svg{width:80%;height:80%;position:relative;z-index:2;pointer-events:none}
+.cell.wall{
+  background:repeating-linear-gradient(45deg,var(--ink) 0 2px,transparent 2px 6px);
+  box-shadow:inset 0 0 0 2px var(--ink);
+}
+.cell.seen{box-shadow:inset 0 0 0 3px var(--hl-line)}
+.cell.perceived{background:var(--hl-bg)}
+.cell.visited::before{
+  content:"";position:absolute;width:20%;height:20%;border-radius:50%;
+  background:var(--ink-soft);opacity:.4;
+}
+.cell.path::after{
+  content:"";position:absolute;width:26%;height:26%;border-radius:50%;
+  background:var(--agent);opacity:.85;z-index:1;
+}
+.cell.path:has(svg)::after{display:none}
+.cell.decided{box-shadow:inset 0 0 0 3px var(--agent)}
+.cell.wall.seen{box-shadow:inset 0 0 0 3px var(--hl-line)}
+.cell.zone{background:repeating-linear-gradient(-45deg,var(--zone) 0 5px,transparent 5px 10px);box-shadow:inset 0 0 0 2px var(--zone-line)}
+.cell.zone.perceived{background:linear-gradient(var(--hl-bg),var(--hl-bg)),repeating-linear-gradient(-45deg,var(--zone) 0 5px,transparent 5px 10px)}
+.cell.zone.broken{background:repeating-linear-gradient(-45deg,var(--zone-line) 0 5px,var(--zone) 5px 10px)}
+.cell.zone.decided{box-shadow:inset 0 0 0 3px var(--agent)}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 0;padding:0;list-style:none;color:var(--ink-soft);font-size:.88rem}
+.legend li{display:flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;display:inline-block;border:1px solid var(--border);border-radius:3px}
+.sw.hl{background:var(--hl-bg)}
+.sw.wl{background:repeating-linear-gradient(45deg,var(--ink) 0 2px,transparent 2px 5px);border-color:var(--ink)}
+.sw.dot{border-radius:50%;background:var(--agent);border:0;width:10px;height:10px}
+.sw.vis{border-radius:50%;background:var(--ink-soft);opacity:.45;border:0;width:8px;height:8px}
+.sw.zn{background:repeating-linear-gradient(-45deg,var(--zone-line) 0 2px,transparent 2px 5px);border-color:var(--zone-line)}
+.sw.zb{background:repeating-linear-gradient(-45deg,var(--zone-line) 0 3px,var(--zone) 3px 6px);border-color:var(--zone-line)}
+.counter{margin-left:auto;font-weight:700;color:var(--ink)}
+.viol{margin-left:14px;color:var(--ink-soft)}
+.viol.bad{color:var(--zone-line)}
+
+.panel{display:flex;flex-direction:column;gap:6px}
+.panel>p.intro{margin:0 0 4px;color:var(--ink-soft)}
+.phase{
+  border:1.5px solid var(--border);
+  border-radius:12px;
+  padding:12px 14px 14px;
+  background:var(--panel);
+  transition:background .2s,border-color .2s;
+}
+.phase h3{margin:0 0 6px;font-size:1.12rem;font-weight:800}
+.phase p{margin:6px 0 0;font-size:.97rem}
+.phase[data-phase="percibe"][data-active="true"]{border-color:var(--c-percibe);background:var(--c-percibe-bg)}
+.phase[data-phase="decide"][data-active="true"]{border-color:var(--c-decide);background:var(--c-decide-bg)}
+.phase[data-phase="actua"][data-active="true"]{border-color:var(--c-actua);background:var(--c-actua-bg)}
+.flow{align-self:center;color:var(--ink-soft);font-size:1.1rem;line-height:1}
+.again{margin:2px 0 0;text-align:center;color:var(--ink-soft);font-size:.9rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  display:inline-flex;gap:6px;align-items:baseline;
+  padding:3px 9px;border-radius:8px;border:1.5px solid var(--border);background:var(--sheet);font-size:.9rem;
+}
+.chip b{font-weight:800}
+.chip[data-st="pared"]{border-style:dashed;border-color:var(--ink)}
+.chip[data-st="meta"]{border-color:var(--goal)}
+.chip[data-st="zona"]{border-color:var(--zone-line);border-style:dashed}
+.rules{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.rules li{
+  padding:5px 9px;border-radius:8px;border:1.5px solid transparent;font-size:.95rem;color:var(--ink-soft);
+}
+.rules li[data-on="true"]{border-color:var(--c-decide);background:var(--sheet);color:var(--ink);font-weight:600}
+
+.after{margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px 36px}
+.after section{min-width:0}
+.after p,.after li{max-width:62ch}
+.after .def{border-left:4px solid var(--border);padding-left:14px;margin:0 0 16px}
+.def.percibe{border-color:var(--c-percibe)}
+.def.decide{border-color:var(--c-decide)}
+.def.actua{border-color:var(--c-actua)}
+.def h3{margin:0 0 2px;font-size:1.05rem}
+.def p{margin:0;color:var(--ink-soft)}
+.after ul{margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:8px}
+.after .note{color:var(--ink-soft);margin:0}
+.foot{margin-top:40px;color:var(--ink-soft);font-size:.9rem}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Conocé a un agente</h1>
+    <p class="lead">Un agente percibe su entorno, decide y actúa para lograr un objetivo. Acá lo ves trabajar paso a paso, y podés cambiar el mundo en el que vive y ponerle restricciones.</p>
+  </header>
+
+  <main class="stage">
+    <p class="hint c-hint" id="hint" aria-live="polite"></p>
+
+    <div class="c-agent">
+      <div class="row">
+        <span class="lbl" id="lbl-agent">Elegí qué agente mirar</span>
+        <div class="seg" role="group" aria-labelledby="lbl-agent" id="seg-mode">
+          <button type="button" data-mode="reglas" aria-pressed="true">Agente de reglas</button>
+          <button type="button" data-mode="objetivo" aria-pressed="false">Agente con objetivo</button>
+        </div>
+      </div>
+      <p class="cap" id="cap-mode"></p>
+    </div>
+
+    <div class="c-sheet">
+      <div class="sheet">
+        <div class="grid" id="grid" role="group" aria-label="Hoja cuadriculada con el agente, la meta y las paredes"></div>
+      </div>
+      <ul class="legend" aria-label="Referencias">
+        <li><svg width="16" height="16" viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="9" width="26" height="24" rx="7" fill="var(--agent)"/></svg>El agente</li>
+        <li><svg width="16" height="16" viewBox="0 0 40 40" aria-hidden="true"><path d="M5 10h13q2 0 2 2v20q0-2-2-2H5zM35 10H22q-2 0-2 2v20q0-2 2-2h13z" fill="var(--goal)"/></svg>La meta</li>
+        <li><span class="sw wl"></span>Pared</li>
+        <li><span class="sw hl"></span>Lo que percibe</li>
+        <li><span class="sw dot"></span>Camino calculado</li>
+        <li><span class="sw vis"></span>Por donde pasó</li>
+        <li><span class="sw zn"></span>Zona prohibida</li>
+        <li><span class="sw zb"></span>Restricción rota</li>
+        <li class="counter"><span id="counter">Pasos dados: 0</span><span id="viol" class="viol"></span></li>
+      </ul>
+    </div>
+
+    <div class="c-actions">
+      <div class="row">
+        <button type="button" class="btn primary" id="btn-step">Dar un paso</button>
+        <button type="button" class="btn" id="btn-play">Reproducir</button>
+        <button type="button" class="btn" id="btn-reset">Volver al inicio</button>
+        <span class="lbl" id="lbl-speed">Velocidad</span>
+        <div class="seg" role="group" aria-labelledby="lbl-speed" id="seg-speed">
+          <button type="button" data-speed="1100" aria-pressed="false">Lenta</button>
+          <button type="button" data-speed="650" aria-pressed="true">Normal</button>
+          <button type="button" data-speed="280" aria-pressed="false">Rápida</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="panel c-panel" aria-label="Qué pasa dentro del agente">
+      <h2>Qué pasa por dentro</h2>
+      <p class="intro">En cada paso, el agente repite tres fases.</p>
+
+      <div class="phase" data-phase="percibe" data-active="false">
+        <h3>Percibe</h3>
+        <div class="chips" id="chips"></div>
+        <p id="t-percibe"></p>
+      </div>
+      <div class="flow" aria-hidden="true">↓</div>
+      <div class="phase" data-phase="decide" data-active="false">
+        <h3>Decide</h3>
+        <ul class="rules" id="rules"></ul>
+        <p id="t-decide"></p>
+      </div>
+      <div class="flow" aria-hidden="true">↓</div>
+      <div class="phase" data-phase="actua" data-active="false">
+        <h3>Actúa</h3>
+        <p id="t-actua"></p>
+      </div>
+      <p class="again">Y vuelve a percibir, ya en su nueva situación.</p>
+    </aside>
+
+    <div class="c-world">
+      <div class="row">
+        <span class="lbl" id="lbl-tool">Cambiá el mundo con un toque</span>
+        <div class="seg" role="group" aria-labelledby="lbl-tool" id="seg-tool">
+          <button type="button" data-tool="pared" aria-pressed="true">Poner o sacar paredes</button>
+          <button type="button" data-tool="meta" aria-pressed="false">Mover la meta</button>
+          <button type="button" data-tool="zona" aria-pressed="false">Marcar zona prohibida</button>
+          <button type="button" data-tool="inicio" aria-pressed="false">Mover el inicio</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="lbl" id="lbl-maps">Mapas listos</span>
+        <div class="seg" role="group" aria-labelledby="lbl-maps" id="seg-maps">
+          <button type="button" data-map="vacio" aria-pressed="false">Mapa vacío</button>
+          <button type="button" data-map="atajo" aria-pressed="false">Atajo prohibido</button>
+          <button type="button" data-map="u" aria-pressed="false">Trampa en U</button>
+          <button type="button" data-map="laberinto" aria-pressed="false">Laberinto</button>
+        </div>
+        <button type="button" class="btn" id="btn-clear">Borrar paredes y zonas</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span class="lbl" id="lbl-restr">Cuánto le importa la restricción al agente con objetivo</span>
+        <div class="seg" role="group" aria-labelledby="lbl-restr" id="seg-restr">
+          <button type="button" data-restr="poco" aria-pressed="true">Poco</button>
+          <button type="button" data-restr="bastante" aria-pressed="false">Bastante</button>
+          <button type="button" data-restr="absoluta" aria-pressed="false">Es absoluta</button>
+        </div>
+      </div>
+      <p class="cap" id="cap-restr"></p>
+    </div>
+  </main>
+
+  <div class="after">
+    <section>
+      <h2>Lo que acabás de ver</h2>
+      <div class="def percibe">
+        <h3>Percibir</h3>
+        <p>El agente recibe información de su entorno. El de reglas solo ve las casillas de al lado; el de objetivo conoce todo el mapa.</p>
+      </div>
+      <div class="def decide">
+        <h3>Decidir</h3>
+        <p>Elige qué hacer. Uno aplica reglas fijas; el otro compara caminos, elige el más corto y vuelve a calcular si algo cambia.</p>
+      </div>
+      <div class="def actua">
+        <h3>Actuar</h3>
+        <p>Hace algo que modifica su situación, en este caso moverse. Después vuelve a percibir y el ciclo sigue.</p>
+      </div>
+    </section>
+    <section>
+      <h2>¿Y los agentes de IA de verdad?</h2>
+      <p class="note">Funcionan con el mismo ciclo, pero percibir puede ser leer un mensaje o una página web, y actuar puede ser buscar información, escribir un archivo o enviar un correo. Lo que decide suele ser un modelo de IA.</p>
+      <p class="note" style="margin-top:10px">Los dos agentes de esta hoja no aprenden: usan reglas o un algoritmo fijo. Es una simplificación para entender la idea.</p>
+    </section>
+    <section>
+      <h2>Para conversar en el taller</h2>
+      <ul>
+        <li>¿Qué percibe el agente de reglas y qué no percibe? ¿Qué le pasa por eso?</li>
+        <li>¿Por qué el agente con objetivo se adapta cuando aparece una pared nueva?</li>
+        <li>¿Qué cosas de la escuela siguen reglas fijas, como el timbre o un semáforo? ¿Cuáles tienen un objetivo?</li>
+        <li>Si un agente pudiera actuar solo en la escuela, por ejemplo enviando mensajes a las familias, ¿qué supervisión humana necesitaría?</li>
+        <li>¿Cuándo sería razonable que un agente rompa una restricción para cumplir su objetivo? ¿Quién debería decidirlo?</li>
+        <li>¿Qué restricciones de la escuela tendrían que ser absolutas para cualquier agente?</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Cuando una restricción pierde contra el objetivo</h2>
+      <p class="note">Si la restricción es solo una preferencia, el agente con objetivo la pesa como un costo y puede romperla para llegar a la meta. El agente de reglas la respeta siempre, pero se traba cuando las reglas no alcanzan.</p>
+      <p class="note" style="margin-top:10px">Por eso, en agentes de IA reales, lo que nunca debe pasar se resuelve con límites duros, como permisos o aprobación humana, y no solo con una instrucción.</p>
+    </section>
+  </div>
+  <p class="foot">Hoja cuadriculada pensada para trabajar el concepto de agente en talleres docentes.</p>
+</div>
+
+<script>
+(function(){
+  var COLS = 10, ROWS = 7;
+  var DIRS = [
+    {k:'arriba', dx:0, dy:-1, name:'Arriba', go:'hacia arriba'},
+    {k:'derecha', dx:1, dy:0, name:'Derecha', go:'a la derecha'},
+    {k:'abajo', dx:0, dy:1, name:'Abajo', go:'hacia abajo'},
+    {k:'izquierda', dx:-1, dy:0, name:'Izquierda', go:'a la izquierda'}
+  ];
+  var PRESETS = {
+    vacio:{walls:[], zones:[], start:[1,3], goal:[8,3]},
+    atajo:{walls:[[5,0],[5,1],[5,2],[5,4],[5,5]], zones:[[5,3]], start:[1,3], goal:[8,3], restr:'poco'},
+    u:{walls:[[3,2],[4,2],[4,3],[3,4],[4,4]], start:[1,3], goal:[8,3]},
+    laberinto:{walls:[[3,0],[3,1],[3,2],[3,3],[3,4],[6,2],[6,3],[6,4],[6,5],[6,6]], start:[1,3], goal:[8,3]}
+  };
+  var CAPS = {
+    reglas:'Sigue reglas fijas y solo mira las casillas de al lado.',
+    objetivo:'Conoce el mapa completo y calcula el mejor camino hasta la meta.'
+  };
+  var PEN = {poco:2, bastante:8, absoluta:Infinity};
+  var CAP_RESTR = {
+    poco:'Para el agente con objetivo, la restricción es una preferencia: pisar la zona le suma un poco de costo.',
+    bastante:'Pisar la zona le suma mucho costo, pero puede hacerlo si no encuentra nada más barato.',
+    absoluta:'Prohibición absoluta: los caminos que pisan la zona no existen para el agente. Si la meta solo se alcanza por ahí, no llega.'
+  };
+  function rulesFor(m){
+    if (m === 'reglas') return [
+      'No piso nunca una zona prohibida.',
+      'Si hay una casilla libre que me acerca a la meta, voy hacia ella.',
+      'Si no hay ninguna, me quedo quieto.'
+    ];
+    return [
+      'Miro todo el mapa y calculo el camino de menor costo hasta la meta.',
+      restr === 'absoluta'
+        ? 'Pisar una zona prohibida está prohibido: ese camino no existe para mí.'
+        : 'Pisar una zona prohibida suma costo (' + (restr === 'poco' ? 'poco' : 'mucho') + '), pero no me lo impide.',
+      'Doy el primer paso de ese camino. Si el mapa cambia, calculo de nuevo.'
+    ];
+  }
+
+  var key = function(x,y){ return x+','+y; };
+  var walls = new Set();
+  var start = {x:1,y:3}, agent = {x:1,y:3}, goal = {x:8,y:3}, facing = 1;
+  var mode = 'reglas', tool = 'pared', speed = 650, restr = 'poco';
+  var zones = new Set(), broken = new Set(), violations = 0;
+  var lastViolation = false, lastZoneBlock = false, stuckZone = false;
+  var visited = new Set(), steps = 0, status = 'idle';
+  var playing = false, busy = false, runId = 0;
+  var view = {perceived:new Set(), seenAll:false, pathSet:new Set(), decided:null};
+
+  var gridEl = document.getElementById('grid');
+  var hintEl = document.getElementById('hint');
+  var capEl = document.getElementById('cap-mode');
+  var chipsEl = document.getElementById('chips');
+  var rulesEl = document.getElementById('rules');
+  var tPercibe = document.getElementById('t-percibe');
+  var tDecide = document.getElementById('t-decide');
+  var tActua = document.getElementById('t-actua');
+  var counterEl = document.getElementById('counter');
+  var violEl = document.getElementById('viol');
+  var capRestr = document.getElementById('cap-restr');
+  var btnStep = document.getElementById('btn-step');
+  var btnPlay = document.getElementById('btn-play');
+  var btnReset = document.getElementById('btn-reset');
+  var btnClear = document.getElementById('btn-clear');
+  var phases = {
+    percibe: document.querySelector('[data-phase="percibe"]'),
+    decide: document.querySelector('[data-phase="decide"]'),
+    actua: document.querySelector('[data-phase="actua"]')
+  };
+
+  /* ---------- dibujo ---------- */
+  var BOOK = '<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 10h13q2 0 2 2v20q0-2-2-2H5z" fill="var(--goal)"/><path d="M35 10H22q-2 0-2 2v20q0-2 2-2h13z" fill="var(--goal)" opacity=".78"/><path d="M9 16h8M9 20h8M9 24h6M23 16h8M23 20h8M23 24h6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".9"/></svg>';
+  function robot(){
+    var e = [[0,-1.6],[1.6,0],[0,1.6],[-1.6,0]][facing];
+    return '<svg viewBox="0 0 40 40" aria-hidden="true">' +
+      '<line x1="20" y1="4" x2="20" y2="9" stroke="var(--agent)" stroke-width="2.5" stroke-linecap="round"/>' +
+      '<circle cx="20" cy="4" r="2.5" fill="var(--agent)"/>' +
+      '<rect x="7" y="9" width="26" height="24" rx="7" fill="var(--agent)"/>' +
+      '<circle cx="14.5" cy="19" r="4.2" fill="#fff"/><circle cx="25.5" cy="19" r="4.2" fill="#fff"/>' +
+      '<circle cx="'+(14.5+e[0])+'" cy="'+(19+e[1])+'" r="2" fill="#1B2A4E"/>' +
+      '<circle cx="'+(25.5+e[0])+'" cy="'+(19+e[1])+'" r="2" fill="#1B2A4E"/>' +
+      '<rect x="14" y="27" width="12" height="2.5" rx="1.2" fill="#fff" opacity=".85"/></svg>';
+  }
+
+  var cells = [];
+  for (var i = 0; i < COLS*ROWS; i++){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cell';
+    b.dataset.x = i % COLS;
+    b.dataset.y = Math.floor(i / COLS);
+    gridEl.appendChild(b);
+    cells.push(b);
+  }
+
+  function render(){
+    for (var i = 0; i < cells.length; i++){
+      var el = cells[i];
+      var x = i % COLS, y = Math.floor(i / COLS), k = key(x,y);
+      var cls = 'cell', html = '', desc = 'libre';
+      var isAgent = (x === agent.x && y === agent.y);
+      var isGoal = (x === goal.x && y === goal.y);
+      if (walls.has(k)){ cls += ' wall'; desc = 'pared'; if (view.seenAll) cls += ' seen'; }
+      if (zones.has(k)){ cls += ' zone'; desc = 'zona prohibida'; if (broken.has(k)) cls += ' broken'; }
+      if (view.perceived.has(k)) cls += ' perceived';
+      if (visited.has(k)) cls += ' visited';
+      if (view.pathSet.has(k)) cls += ' path';
+      if (view.decided === k) cls += ' decided';
+      if (isGoal){ html += BOOK; desc = 'meta'; if (view.seenAll) cls += ' seen'; }
+      if (isAgent){ html += robot(); desc = isGoal ? 'agente en la meta' : 'agente'; }
+      el.className = cls;
+      if (el.innerHTML !== html) el.innerHTML = html;
+      el.setAttribute('aria-label', 'Columna ' + (x+1) + ', fila ' + (y+1) + ': ' + desc);
+    }
+    counterEl.textContent = 'Pasos dados: ' + steps;
+    if (zones.size || violations){
+      violEl.textContent = 'Restricciones incumplidas: ' + violations;
+      violEl.className = 'viol' + (violations ? ' bad' : '');
+    } else { violEl.textContent = ''; violEl.className = 'viol'; }
+  }
+
+  /* ---------- panel ---------- */
+  function setActive(name){
+    for (var p in phases){ phases[p].dataset.active = (p === name) ? 'true' : 'false'; }
+  }
+  function renderRules(m, active){
+    rulesEl.innerHTML = '';
+    rulesFor(m).forEach(function(t, idx){
+      var li = document.createElement('li');
+      li.textContent = t;
+      li.dataset.on = (active && active.indexOf(idx) !== -1) ? 'true' : 'false';
+      rulesEl.appendChild(li);
+    });
+  }
+  function clearPanel(){
+    setActive(null);
+    chipsEl.innerHTML = '';
+    tPercibe.textContent = 'Todavía no percibí nada. Dame un paso.';
+    tDecide.textContent = '';
+    tActua.textContent = '';
+    renderRules(mode, []);
+  }
+  function chip(label, value, st){
+    var s = document.createElement('span');
+    s.className = 'chip';
+    if (st) s.dataset.st = st;
+    var b = document.createElement('b');
+    b.textContent = label;
+    s.appendChild(b);
+    s.appendChild(document.createTextNode(value));
+    chipsEl.appendChild(s);
+  }
+  function setHint(t){ hintEl.textContent = t; }
+
+  /* ---------- lógica del agente ---------- */
+  function inB(x,y){ return x >= 0 && y >= 0 && x < COLS && y < ROWS; }
+  function free(x,y){ return inB(x,y) && !walls.has(key(x,y)); }
+  function inZone(x,y){ return zones.has(key(x,y)); }
+  function dist(){ return Math.abs(goal.x-agent.x) + Math.abs(goal.y-agent.y); }
+  function plural(n, s, p){ return n + ' ' + (n === 1 ? s : p); }
+
+  function metaText(){
+    var dx = goal.x - agent.x, dy = goal.y - agent.y;
+    if (!dx && !dy) return 'Estoy parado en la meta.';
+    var p = [];
+    if (dx) p.push(plural(Math.abs(dx),'casilla','casillas') + (dx > 0 ? ' a la derecha' : ' a la izquierda'));
+    if (dy) p.push(plural(Math.abs(dy),'casilla','casillas') + (dy > 0 ? ' hacia abajo' : ' hacia arriba'));
+    return 'La meta está a ' + p.join(' y ') + '.';
+  }
+
+  function dijkstra(pen){
+    var dist = new Map(), prev = new Map(), done = new Set();
+    var pq = [{x:agent.x, y:agent.y, d:0}];
+    dist.set(key(agent.x,agent.y), 0);
+    prev.set(key(agent.x,agent.y), null);
+    while (pq.length){
+      var bi = 0;
+      for (var i = 1; i < pq.length; i++){ if (pq[i].d < pq[bi].d) bi = i; }
+      var c = pq.splice(bi, 1)[0], ck = key(c.x,c.y);
+      if (done.has(ck)) continue;
+      done.add(ck);
+      if (c.x === goal.x && c.y === goal.y) break;
+      for (var j = 0; j < DIRS.length; j++){
+        var nx = c.x + DIRS[j].dx, ny = c.y + DIRS[j].dy;
+        if (!free(nx,ny)) continue;
+        var z = inZone(nx,ny);
+        if (z && pen === Infinity) continue;
+        var nd = c.d + 1 + (z ? pen : 0), nk = key(nx,ny);
+        if (!dist.has(nk) || nd < dist.get(nk)){
+          dist.set(nk, nd);
+          prev.set(nk, {x:c.x, y:c.y});
+          pq.push({x:nx, y:ny, d:nd});
+        }
+      }
+    }
+    var gk = key(goal.x,goal.y);
+    if (!done.has(gk)) return null;
+    var path = [], cur = {x:goal.x, y:goal.y};
+    while (cur){ path.push(cur); cur = prev.get(key(cur.x,cur.y)); }
+    path.reverse();
+    return {path:path, cost:dist.get(gk)};
+  }
+
+  function decideReglas(){
+    var dx = goal.x - agent.x, dy = goal.y - agent.y;
+    var horiz = dx !== 0 ? DIRS[dx > 0 ? 1 : 3] : null;
+    var vert = dy !== 0 ? DIRS[dy > 0 ? 2 : 0] : null;
+    var order = Math.abs(dx) >= Math.abs(dy) ? [horiz, vert] : [vert, horiz];
+    var blockedZone = false;
+    for (var i = 0; i < order.length; i++){
+      var d = order[i];
+      if (!d) continue;
+      var x = agent.x + d.dx, y = agent.y + d.dy;
+      if (!free(x,y)) continue;
+      if (inZone(x,y)){ blockedZone = true; continue; }
+      return {type:'move', dir:d, rules:[1]};
+    }
+    return {type:'stay', zone:blockedZone, rules: blockedZone ? [0,2] : [2]};
+  }
+  function decideObjetivo(){
+    var plan = dijkstra(PEN[restr]);
+    if (!plan){
+      var open = zones.size ? dijkstra(0) : null;
+      return {type:'nopath', zoneBlocks:!!open, rules:[0,1,2]};
+    }
+    var path = plan.path, n = path[1];
+    var dir = DIRS.filter(function(d){ return agent.x + d.dx === n.x && agent.y + d.dy === n.y; })[0];
+    var crossed = path.slice(1).filter(function(c){ return inZone(c.x,c.y); }).length;
+    var info = {type:'move', dir:dir, path:path, len:path.length - 1, crossed:crossed, safeLen:null, rules:[0,1,2]};
+    if (crossed > 0){
+      var safe = dijkstra(Infinity);
+      info.safeLen = safe ? safe.path.length - 1 : null;
+    }
+    return info;
+  }
+
+  function wait(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+
+  function updateButtons(){
+    btnStep.disabled = busy || playing;
+    btnPlay.textContent = playing ? 'Pausar' : 'Reproducir';
+    btnPlay.disabled = busy && !playing;
+    document.querySelectorAll('#seg-mode button').forEach(function(b){ b.disabled = busy; });
+  }
+
+  async function stepOnce(){
+    if (busy) return;
+    if (agent.x === goal.x && agent.y === goal.y){
+      status = 'done';
+      setHint('Ya está en la meta. Mové la meta o volvé al inicio para seguir.');
+      return;
+    }
+    var my = runId, m = mode, t = speed;
+    busy = true; status = 'idle';
+    lastViolation = false; lastZoneBlock = false; stuckZone = false;
+    updateButtons();
+
+    /* Percibe */
+    view = {perceived:new Set(), seenAll:false, pathSet:new Set(), decided:null};
+    setActive('percibe');
+    renderRules(m, []);
+    tDecide.textContent = ''; tActua.textContent = '';
+    chipsEl.innerHTML = '';
+    if (m === 'reglas'){
+      DIRS.forEach(function(d){
+        var x = agent.x + d.dx, y = agent.y + d.dy, st;
+        if (!inB(x,y)) st = 'borde';
+        else if (walls.has(key(x,y))) st = 'pared';
+        else if (zones.has(key(x,y))) st = 'zona';
+        else if (x === goal.x && y === goal.y) st = 'meta';
+        else st = 'libre';
+        if (inB(x,y)) view.perceived.add(key(x,y));
+        chip(d.name, st === 'zona' ? 'zona prohibida' : st, st);
+      });
+      tPercibe.textContent = 'Solo veo las casillas de al lado. ' + metaText();
+    } else {
+      view.seenAll = true;
+      chip('Mapa', 'completo');
+      chip('Paredes', String(walls.size));
+      if (zones.size) chip('Zonas prohibidas', String(zones.size), 'zona');
+      chip('Meta', 'a ' + plural(dist(),'casilla','casillas'), 'meta');
+      tPercibe.textContent = 'Veo todo el mapa. ' + metaText();
+    }
+    render();
+    await wait(t);
+    if (my !== runId) return;
+
+    /* Decide */
+    var dec = (m === 'reglas') ? decideReglas() : decideObjetivo();
+    setActive('decide');
+    renderRules(m, dec.rules);
+    view.perceived = new Set();
+    if (dec.type === 'move'){
+      var tx = agent.x + dec.dir.dx, ty = agent.y + dec.dir.dy;
+      view.decided = key(tx,ty);
+      if (m === 'objetivo'){
+        dec.path.forEach(function(c){
+          if (!(c.x === agent.x && c.y === agent.y) && !(c.x === goal.x && c.y === goal.y)) view.pathSet.add(key(c.x,c.y));
+        });
+        var txt = 'Camino de menor costo: ' + plural(dec.len,'paso','pasos') + '.';
+        if (dec.crossed > 0){
+          txt += ' Cruza la zona prohibida (' + plural(dec.crossed,'casilla','casillas') + ').';
+          txt += (dec.safeLen !== null)
+            ? ' Rodearla serían ' + plural(dec.safeLen,'paso','pasos') + '. Llegar a la meta pesa más que la restricción.'
+            : ' No hay forma de llegar sin pisarla.';
+        } else if (zones.size){
+          txt += ' Sin pisar zonas prohibidas.';
+        }
+        txt += ' Primer paso: ' + dec.dir.go + '.';
+        tDecide.textContent = txt;
+      } else {
+        tDecide.textContent = 'Hay una casilla libre ' + dec.dir.go + ' que me acerca a la meta. Voy hacia ahí.';
+      }
+    } else if (dec.type === 'stay'){
+      stuckZone = dec.zone;
+      tDecide.textContent = dec.zone
+        ? 'La casilla que me acerca a la meta es una zona prohibida. Respeto la restricción y me quedo quieto.'
+        : 'Ninguna casilla libre me acerca a la meta. Me quedo quieto.';
+    } else {
+      lastZoneBlock = dec.zoneBlocks;
+      tDecide.textContent = dec.zoneBlocks
+        ? 'Para llegar tendría que pisar la zona prohibida, y eso no me lo permiten. No encuentro camino.'
+        : 'No encuentro ningún camino hasta la meta.';
+    }
+    render();
+    await wait(t);
+    if (my !== runId) return;
+
+    /* Actúa */
+    setActive('actua');
+    view.decided = null;
+    if (dec.type === 'move'){
+      var nx = agent.x + dec.dir.dx, ny = agent.y + dec.dir.dy;
+      facing = DIRS.indexOf(dec.dir);
+      if (free(nx,ny)){
+        visited.add(key(agent.x,agent.y));
+        agent = {x:nx, y:ny};
+        steps++;
+        var base = 'Me muevo ' + dec.dir.go + '.';
+        if (inZone(nx,ny)){
+          violations++; broken.add(key(nx,ny)); lastViolation = true;
+          base += ' Pisé una zona prohibida: incumplí la restricción.';
+        }
+        if (agent.x === goal.x && agent.y === goal.y){
+          status = 'done';
+          tActua.textContent = base + ' ¡Llegué a la meta! Objetivo cumplido.';
+        } else {
+          tActua.textContent = base;
+        }
+      } else {
+        tActua.textContent = 'Alguien puso una pared justo ahí, así que no me muevo. En el próximo paso vuelvo a percibir.';
+      }
+    } else if (dec.type === 'stay'){
+      status = 'stuck';
+      tActua.textContent = stuckZone
+        ? 'No hago nada. Respeté la restricción, pero quedé trabado: mis reglas no dicen cómo seguir.'
+        : 'No hago nada. Quedé trabado: mis reglas no dicen qué hacer en esta situación.';
+    } else {
+      status = 'nopath';
+      tActua.textContent = lastZoneBlock
+        ? 'Respeto la restricción, así que me quedo quieto.'
+        : 'No hay camino posible, así que me quedo quieto.';
+    }
+    render();
+    await wait(t * 0.6);
+    if (my !== runId) return;
+
+    busy = false;
+    updateButtons();
+    afterStepHint(m);
+  }
+
+  function afterStepHint(m){
+    if (status === 'done'){
+      if (violations > 0) setHint('¡Llegó, pero rompió la restricción ' + plural(violations,'vez','veces') + '! Cumplir el objetivo no es lo mismo que cumplirlo bien.');
+      else if (zones.size) setHint('¡Llegó sin pisar la zona prohibida!');
+      else setHint('¡Llegó! Probá otro mapa, o mové la meta y dale otro paso.');
+    } else if (violations > 0) {
+      setHint('Se saltó la restricción: llegar a la meta pesó más. Probá cambiar cuánto le importa.');
+    } else if (status === 'stuck') {
+      setHint(stuckZone
+        ? 'Respetó la restricción y se trabó. Cambiá al agente con objetivo y mirá qué hace.'
+        : 'Se trabó: sus reglas no dicen qué hacer acá. Cambiá al agente con objetivo y dale otro paso.');
+    } else if (status === 'nopath') {
+      setHint(lastZoneBlock
+        ? 'La restricción absoluta le cierra el único camino. ¿Sacás la zona o aflojás la restricción?'
+        : 'No hay ningún camino. Sacá una pared para abrirle uno.');
+    } else if (m === 'objetivo') {
+      setHint('Reproducí y, mientras camina, poné una pared o una zona en su camino.');
+    } else {
+      setHint('Probá los mapas “Atajo prohibido” o “Trampa en U” y mirá qué le pasa a este agente.');
+    }
+  }
+
+  async function play(){
+    if (playing){ playing = false; updateButtons(); return; }
+    playing = true;
+    var my = runId;
+    updateButtons();
+    while (playing && my === runId){
+      await stepOnce();
+      if (my !== runId) return;
+      if (status === 'done' || status === 'stuck' || status === 'nopath') break;
+      await wait(Math.max(120, speed * 0.35));
+    }
+    if (my === runId){ playing = false; updateButtons(); }
+  }
+
+  function resetAgent(hint){
+    runId++;
+    playing = false; busy = false;
+    agent = {x:start.x, y:start.y};
+    facing = 1; visited = new Set(); steps = 0; status = 'idle';
+    broken = new Set(); violations = 0;
+    lastViolation = false; lastZoneBlock = false; stuckZone = false;
+    view = {perceived:new Set(), seenAll:false, pathSet:new Set(), decided:null};
+    clearPanel();
+    render();
+    updateButtons();
+    setHint(hint || 'Tocá “Dar un paso” y fijate qué hace el agente en cada fase.');
+  }
+
+  function loadMap(name){
+    var p = PRESETS[name];
+    walls = new Set(p.walls.map(function(w){ return key(w[0], w[1]); }));
+    zones = new Set((p.zones || []).map(function(w){ return key(w[0], w[1]); }));
+    start = {x:p.start[0], y:p.start[1]};
+    goal = {x:p.goal[0], y:p.goal[1]};
+    var hint = null;
+    if (p.restr) setRestr(p.restr);
+    if (name === 'atajo') hint = 'Hay una zona prohibida justo en el atajo. Probá cada agente y fijate qué hace.';
+    if (name === 'u') hint = 'Mirá qué hace el agente de reglas acá. Después cambiá al agente con objetivo.';
+    if (name === 'laberinto') hint = 'Hay un camino, pero no es recto. ¿Quién lo encuentra?';
+    resetAgent(hint);
+    markMap(name);
+  }
+  function setRestr(v){
+    restr = v;
+    document.querySelectorAll('#seg-restr button').forEach(function(b){
+      b.setAttribute('aria-pressed', b.dataset.restr === v ? 'true' : 'false');
+    });
+    capRestr.textContent = CAP_RESTR[v] + ' El agente de reglas siempre la respeta, aunque eso lo deje trabado.';
+  }
+  function markMap(name){
+    document.querySelectorAll('#seg-maps button').forEach(function(b){
+      b.setAttribute('aria-pressed', b.dataset.map === name ? 'true' : 'false');
+    });
+  }
+
+  /* ---------- interacción ---------- */
+  function setWall(x,y,on){
+    if ((x === agent.x && y === agent.y) || (x === goal.x && y === goal.y)) return;
+    if (on){ walls.add(key(x,y)); zones.delete(key(x,y)); } else walls.delete(key(x,y));
+  }
+  function setZone(x,y,on){
+    if ((x === agent.x && y === agent.y) || (x === goal.x && y === goal.y)) return;
+    if (on){ zones.add(key(x,y)); walls.delete(key(x,y)); } else zones.delete(key(x,y));
+  }
+  function paintCell(x,y,v){
+    if (tool === 'zona') setZone(x,y,v); else setWall(x,y,v);
+  }
+  function cellClick(x,y){
+    var k = key(x,y);
+    if (tool === 'pared'){
+      setWall(x, y, !walls.has(k));
+      if (status === 'stuck' || status === 'nopath') status = 'idle';
+    } else if (tool === 'zona'){
+      setZone(x, y, !zones.has(k));
+      if (status === 'stuck' || status === 'nopath') status = 'idle';
+    } else if (tool === 'meta'){
+      if (x === agent.x && y === agent.y) return;
+      walls.delete(k); zones.delete(k);
+      goal = {x:x, y:y};
+      if (status === 'done') status = 'idle';
+    } else if (tool === 'inicio'){
+      if (x === goal.x && y === goal.y) return;
+      walls.delete(k); zones.delete(k);
+      start = {x:x, y:y};
+      resetAgent();
+      markMap(null);
+      return;
+    }
+    markMap(null);
+    render();
+  }
+
+  var drag = null, suppressClick = false;
+  gridEl.addEventListener('click', function(e){
+    var c = e.target.closest('.cell');
+    if (!c || suppressClick) return;
+    cellClick(+c.dataset.x, +c.dataset.y);
+  });
+  gridEl.addEventListener('pointerdown', function(e){
+    if (e.pointerType !== 'mouse' || (tool !== 'pared' && tool !== 'zona')) return;
+    var c = e.target.closest('.cell');
+    if (!c) return;
+    var kk = key(+c.dataset.x, +c.dataset.y);
+    drag = {origin:c, value: tool === 'zona' ? !zones.has(kk) : !walls.has(kk), moved:false};
+  });
+  gridEl.addEventListener('pointerover', function(e){
+    if (!drag || e.buttons !== 1) return;
+    var c = e.target.closest('.cell');
+    if (!c || (c === drag.origin && !drag.moved)) return;
+    if (!drag.moved){
+      paintCell(+drag.origin.dataset.x, +drag.origin.dataset.y, drag.value);
+      drag.moved = true;
+    }
+    paintCell(+c.dataset.x, +c.dataset.y, drag.value);
+    markMap(null);
+    render();
+  });
+  window.addEventListener('pointerup', function(){
+    if (drag && drag.moved){
+      suppressClick = true;
+      setTimeout(function(){ suppressClick = false; }, 0);
+    }
+    drag = null;
+  });
+
+  function bindSeg(id, attr, fn){
+    document.querySelectorAll('#' + id + ' button').forEach(function(b){
+      b.addEventListener('click', function(){
+        document.querySelectorAll('#' + id + ' button').forEach(function(o){
+          o.setAttribute('aria-pressed', o === b ? 'true' : 'false');
+        });
+        fn(b.dataset[attr]);
+      });
+    });
+  }
+  bindSeg('seg-mode', 'mode', function(v){
+    mode = v;
+    capEl.textContent = CAPS[v];
+    if (status === 'stuck' || status === 'nopath') status = 'idle';
+    view = {perceived:new Set(), seenAll:false, pathSet:new Set(), decided:null};
+    clearPanel();
+    render();
+    setHint(v === 'objetivo'
+      ? 'Ahora dale un paso: este agente conoce todo el mapa.'
+      : 'Este agente solo mira las casillas de al lado.');
+  });
+  bindSeg('seg-speed', 'speed', function(v){ speed = +v; });
+  bindSeg('seg-tool', 'tool', function(v){ tool = v; });
+  bindSeg('seg-maps', 'map', function(v){ loadMap(v); });
+  bindSeg('seg-restr', 'restr', function(v){
+    setRestr(v);
+    if (status === 'stuck' || status === 'nopath') status = 'idle';
+    if (!busy && mode === 'objetivo') renderRules(mode, []);
+  });
+
+  btnStep.addEventListener('click', function(){ stepOnce(); });
+  btnPlay.addEventListener('click', play);
+  btnReset.addEventListener('click', function(){ resetAgent(); });
+  btnClear.addEventListener('click', function(){
+    walls = new Set(); zones = new Set();
+    if (status === 'stuck' || status === 'nopath') status = 'idle';
+    markMap(null);
+    render();
+    setHint('Sin paredes ni zonas. Dibujá las tuyas tocando las casillas.');
+  });
+
+  capEl.textContent = CAPS[mode];
+  setRestr('poco');
+  loadMap('vacio');
+})();
+</script>
+</body>
+</html>
